@@ -1,7 +1,4 @@
 `include "slave.sv"
-//`include "nochw2.sv"
-//`include "perm.sv"
-//`include "m55.sv"
 `include "fifo.sv"
 `include "pri_rr_arb.sv"
 
@@ -134,453 +131,430 @@ module ps(NOCI.TI ti, NOCI.FO fo);
     always@(posedge clocky)
     begin
 
-	if(resety == 1)
-	begin
-		tod_ctl_0 = 0;
-		tod_data_0 = 8'd0;
-		tod_ctl_1 = 0;
-		tod_data_1 = 8'd0;
-		stm = 0;
-	end
-
-	case(stm)
-	0:
-	begin
-
-		if((ti.noc_to_dev_ctl == 1)&&(ti.noc_to_dev_data != 0))
-		begin
-			fifo_in[0] = ti.noc_to_dev_data;
-			if(fifo_in[0][2:0] == 3'b010)
-			begin			
-				input_countupto = (2**fifo_in[0][5:3])+(2**fifo_in[0][7:6])+1;
-				command = 3'b010;
-			end
-
-			if(fifo_in[0][2:0] == 3'b001)
-			begin
-				input_countupto = (2**fifo_in[0][7:6])+2;
-				command = 3'b001;
-			end
-			stm = 1;
-		end
-	end
-
-	1:
-	begin
-
-		fifo_in[1] = fifo_in[0];
-		fifo_in[0] = ti.noc_to_dev_data;
-		address_in = fifo_in[0][7:0];
-
-		case(address_in)
-		64:
-		begin
-			tod_ctl_0 = 1;
-			tod_data_0 = fifo_in[1];
-			//slave_0_fifo_write = 1;
-			//slave_0_fifo_read = 1;
-			//slave_1_fifo_write = 0;
-			//slave_1_fifo_read = 0;
-		end
-		65:
-		begin
-			//$display($time);
-			tod_ctl_1 = 1;
-			tod_data_1 = fifo_in[1];
-			//slave_0_fifo_write = 0;
-			//slave_0_fifo_read = 0;
-			//slave_1_fifo_write = 1;
-			//slave_1_fifo_read = 1;
-		end
-		66:
-		begin
-			tod_ctl_2 = 1;
-			tod_data_2 = fifo_in[1];
-		end
-		67:
-		begin
-			tod_ctl_3 = 1;
-			tod_data_3 = fifo_in[1];
-		end
-		endcase
-
-		stm = 2;
-	end
-	
-	2:
-	begin
-
-		fifo_in[1] = fifo_in[0];
-		fifo_in[0] = ti.noc_to_dev_data;
-
-		case(address_in)
-		64:
+		if(resety == 1)
 		begin
 			tod_ctl_0 = 0;
-			tod_data_0 = fifo_in[1];		
-		end
-		65:
-		begin
+			tod_data_0 = 8'd0;
 			tod_ctl_1 = 0;
-			tod_data_1 = fifo_in[1];
-		end
-		66:
-		begin
-			tod_ctl_2 = 0;
-			tod_data_2 = fifo_in[1];
-		end
-		67:
-		begin
-			tod_ctl_3 = 0;
-			tod_data_3 = fifo_in[1];
-		end
-		endcase
-		
-		if(input_counter < input_countupto)
-		begin		
-			input_counter = input_counter + 1;
-			stm = 2;
+			tod_data_1 = 8'd0;
+			stm = 0;
 		end
 
-		else 
-		begin	
-			input_counter = 0;
-			if(command == 3'b001)
+		case(stm)
+			0:
 			begin
-				if(address_in == 64)tod_ctl_0 = 1;
-				if(address_in == 65)tod_ctl_1 = 1;
-				if(address_in == 66)tod_ctl_2 = 1;
-				if(address_in == 67)tod_ctl_3 = 1;
+
+				if((ti.noc_to_dev_ctl == 1)&&(ti.noc_to_dev_data != 0))
+				begin
+					fifo_in[0] = ti.noc_to_dev_data;
+					
+					if(fifo_in[0][2:0] == 3'b010)
+					begin			
+						input_countupto = (2**fifo_in[0][5:3])+(2**fifo_in[0][7:6])+1;
+						command = 3'b010;
+					end
+
+					if(fifo_in[0][2:0] == 3'b001)
+					begin
+						input_countupto = (2**fifo_in[0][7:6])+2;
+						command = 3'b001;
+					end
+					stm = 1;
+				end
 			end
 
-			if((ti.noc_to_dev_ctl == 1)&&(ti.noc_to_dev_data != 0))
+			1:
 			begin
+				fifo_in[1] = fifo_in[0];
 				fifo_in[0] = ti.noc_to_dev_data;
-				if(fifo_in[0][2:0] == 3'b010)
-				begin			
-					input_countupto = (2**fifo_in[0][5:3])+(2**fifo_in[0][7:6])+1;
-					command = 3'b010;
-				end
+				address_in = fifo_in[0][7:0];
 
-				if(fifo_in[0][2:0] == 3'b001)
+				case(address_in)
+				64:
 				begin
-					input_countupto = (2**fifo_in[0][7:6])+2;
-					command = 3'b001;
+					tod_ctl_0 = 1;
+					tod_data_0 = fifo_in[1];
 				end
+				65:
+				begin
+					tod_ctl_1 = 1;
+					tod_data_1 = fifo_in[1];
+				end
+				66:
+				begin
+					tod_ctl_2 = 1;
+					tod_data_2 = fifo_in[1];
+				end
+				67:
+				begin
+					tod_ctl_3 = 1;
+					tod_data_3 = fifo_in[1];
+				end
+				endcase
 
-				stm = 1;
+				stm = 2;
 			end
 			
-			else stm = 0;
+			2:
+			begin
+				fifo_in[1] = fifo_in[0];
+				fifo_in[0] = ti.noc_to_dev_data;
+
+				case(address_in)
+				64:
+				begin
+					tod_ctl_0 = 0;
+					tod_data_0 = fifo_in[1];		
+				end
+				65:
+				begin
+					tod_ctl_1 = 0;
+					tod_data_1 = fifo_in[1];
+				end
+				66:
+				begin
+					tod_ctl_2 = 0;
+					tod_data_2 = fifo_in[1];
+				end
+				67:
+				begin
+					tod_ctl_3 = 0;
+					tod_data_3 = fifo_in[1];
+				end
+				endcase
+				
+				if(input_counter < input_countupto)
+				begin		
+					input_counter = input_counter + 1;
+					stm = 2;
+				end
+
+				else 
+				begin	
+					input_counter = 0;
+					
+					if(command == 3'b001)
+					begin
+					
+						if(address_in == 64)tod_ctl_0 = 1;
+						if(address_in == 65)tod_ctl_1 = 1;
+						if(address_in == 66)tod_ctl_2 = 1;
+						if(address_in == 67)tod_ctl_3 = 1;
+					end
+
+					if((ti.noc_to_dev_ctl == 1)&&(ti.noc_to_dev_data != 0))
+					begin
+						fifo_in[0] = ti.noc_to_dev_data;
+						
+						if(fifo_in[0][2:0] == 3'b010)
+						begin			
+							input_countupto = (2**fifo_in[0][5:3])+(2**fifo_in[0][7:6])+1;
+							command = 3'b010;
+						end
+
+						if(fifo_in[0][2:0] == 3'b001)
+						begin
+							input_countupto = (2**fifo_in[0][7:6])+2;
+							command = 3'b001;
+						end
+
+						stm = 1;
+					end
+					
+					else stm = 0;
+				end
+			end
+		endcase
+    end
+
+    always@(*)
+    begin
+		if((stupid_signal_0 == 1)&&(resety == 0))
+		begin
+			slave_0_fifo_write = 1;
+			slave_0_req = 1;
 		end
-	end
-	endcase
 
+		if(((frm_ctl_0 == 1)&&(stupid_signal_0 == 0))&&(resety == 0))
+		begin
+			slave_0_fifo_write = 0;
+		end
+
+		if(slave_0_gnt == 1) slave_0_req = 0;
     end
-//
-    //always@(posedge stupid_signal_0 or posedge frm_ctl_0 or posedge slave_0_gnt)
+
     always@(*)
     begin
-	if((stupid_signal_0 == 1)&&(resety == 0))
-	begin
-		slave_0_fifo_write = 1;
-		slave_0_req = 1;
-	end
+		if((stupid_signal_1 == 1)&&(resety == 0))
+		begin
+			slave_1_fifo_write = 1;
+			slave_1_req = 1;
+		end
 
+		if(((frm_ctl_1 == 1)&&(stupid_signal_1 == 0))&&(resety == 0))
+		begin
+			slave_1_fifo_write = 0;
+		end
 
-	if(((frm_ctl_0 == 1)&&(stupid_signal_0 == 0))&&(resety == 0))
-	begin
-		slave_0_fifo_write = 0;
-	end
-
-	if(slave_0_gnt == 1) slave_0_req = 0;
+		if(slave_1_gnt == 1) slave_1_req = 0;
     end
-//    
-    //always@(posedge stupid_signal_1 or posedge frm_ctl_1 or posedge slave_1_gnt)
+
     always@(*)
     begin
-	if((stupid_signal_1 == 1)&&(resety == 0))
-	begin
-		slave_1_fifo_write = 1;
-		slave_1_req = 1;
-	end
+		if((stupid_signal_2 == 1)&&(resety == 0))
+		begin
+			slave_2_fifo_write = 1;
+			slave_2_req = 1;
+		end
 
+		if(((frm_ctl_2 == 1)&&(stupid_signal_2 == 0))&&(resety == 0))
+		begin
+			slave_2_fifo_write = 0;
+		end
 
-	if(((frm_ctl_1 == 1)&&(stupid_signal_1 == 0))&&(resety == 0))
-	begin
-		slave_1_fifo_write = 0;
-	end
-
-	if(slave_1_gnt == 1) slave_1_req = 0;
+		if(slave_2_gnt == 1) slave_2_req = 0;
     end
-//
-    //always@(posedge stupid_signal_2 or posedge frm_ctl_2 or posedge slave_2_gnt)
+
     always@(*)
     begin
-	if((stupid_signal_2 == 1)&&(resety == 0))
-	begin
-		slave_2_fifo_write = 1;
-		slave_2_req = 1;
-	end
+		if((stupid_signal_3 == 1)&&(resety == 0))
+		begin
+			slave_3_fifo_write = 1;
+			slave_3_req = 1;
+		end
 
+		if(((frm_ctl_3 == 1)&&(stupid_signal_3 == 0))&&(resety == 0))
+		begin
+			slave_3_fifo_write = 0;
+		end
 
-	if(((frm_ctl_2 == 1)&&(stupid_signal_2 == 0))&&(resety == 0))
-	begin
-		slave_2_fifo_write = 0;
-	end
-
-	if(slave_2_gnt == 1) slave_2_req = 0;
+		if(slave_3_gnt == 1) slave_3_req = 0;
     end
- //   
-    //always@(posedge stupid_signal_3 or posedge frm_ctl_3 or posedge slave_3_gnt)
-    always@(*)
-    begin
-	if((stupid_signal_3 == 1)&&(resety == 0))
-	begin
-		slave_3_fifo_write = 1;
-		slave_3_req = 1;
-	end
 
-
-	if(((frm_ctl_3 == 1)&&(stupid_signal_3 == 0))&&(resety == 0))
-	begin
-		slave_3_fifo_write = 0;
-	end
-
-	if(slave_3_gnt == 1) slave_3_req = 0;
-    end
-//
     always@(posedge clocky)
     begin
 
-	if(resety == 1)
-	begin
-		fo.noc_from_dev_ctl = 1;
-		stm_out = 0;
-		out_cmd = 3'b000;
-		fo.noc_from_dev_data = 0;
-		
-	end
-
-	case(stm_out)
-	0: // deal with response command
-	begin
-		fo.noc_from_dev_ctl = 1;
-		fo.noc_from_dev_data = 0;
-
-		if(arb_grants != 0)
-		begin
-
-			arb_lock = 1;
-			//fo.noc_from_dev_ctl = 1;
-
-			case(arb_grants)
-			4'b0001:
-			begin
-				fo.noc_from_dev_data = #1 fifo_out_0;
-				//fo.noc_from_dev_data = fifo_out_0;
-				slave_0_fifo_read = 1;
-				out_cmd = fifo_out_0 [2:0];
-			end
-			4'b0010:
-			begin
-				fo.noc_from_dev_data = #1 fifo_out_1;
-				//fo.noc_from_dev_data = fifo_out_1;
-				slave_1_fifo_read = 1;
-				out_cmd = fifo_out_1 [2:0];
-			end
-			4'b0100:
-			begin
-				fo.noc_from_dev_data = #1 fifo_out_2;
-				//fo.noc_from_dev_data = fifo_out_2;
-				slave_2_fifo_read = 1;
-				out_cmd = fifo_out_2 [2:0];
-			end
-			4'b1000:
-			begin
-				fo.noc_from_dev_data = #1 fifo_out_3;
-				//fo.noc_from_dev_data = fifo_out_3;
-				slave_3_fifo_read = 1;
-				out_cmd = fifo_out_3 [2:0];
-			end			
-			endcase	
-
-			out_intermittent_counter = 0;
-			
-			stm_out = 1;
-		end
-
-		else
-		begin
-			slave_0_fifo_read = 0;
-			slave_1_fifo_read = 0;
-			slave_2_fifo_read = 0;
-			slave_3_fifo_read = 0;		
-		end
-	end
-
-	1: // to deal with setting frm ctl low, and destination id then source id
-	begin
-		if(out_intermittent_counter == 1) fo.noc_from_dev_ctl = 0;
-
-		case(arb_grants)
-		4'b0001:
-		begin
-			if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_0;
-		end
-		4'b0010:
-		begin
-			if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_1;
-		end
-		4'b0100:
-		begin
-			if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_2;
-		end
-		4'b1000:
-		begin
-			if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_3;
-		end			
-		endcase	
-		
-		if(out_intermittent_counter < 3)
-		begin
-			out_intermittent_counter = out_intermittent_counter + 1;			
-			stm_out = 1;
-		end
-
-		else 
-		begin
-			//if(out_cmd == 3'b100) arb_lock = 0;
-			if(out_cmd == 3'b011) out_countupto = fo.noc_from_dev_data;
-			stm_out = 2;
-		end
-	end
-	
-	2:
-	begin
-		case(arb_grants)
-		4'b0001:
-		begin
-			fo.noc_from_dev_data = fifo_out_0;
-			if(out_cmd == 3'b100) slave_0_fifo_read = 0;
-
-			//if(out_cmd == 3'b011) out_countupto = fo.noc_from_dev_data;
-		end
-		4'b0010:
-		begin
-			fo.noc_from_dev_data = fifo_out_1;
-			if(out_cmd == 3'b100) slave_1_fifo_read = 0;
-
-			//if(out_cmd == 3'b011) out_countupto = fo.noc_from_dev_data;
-		end
-		4'b0100:
-		begin
-			fo.noc_from_dev_data = fifo_out_2;
-			if(out_cmd == 3'b100) slave_2_fifo_read = 0;
-
-			//if(out_cmd == 3'b011) out_countupto = fo.noc_from_dev_data;
-		end
-		4'b1000:
-		begin
-			fo.noc_from_dev_data = fifo_out_3;
-			if(out_cmd == 3'b100) slave_3_fifo_read = 0;
-
-			//if(out_cmd == 3'b011) out_countupto = fo.noc_from_dev_data;
-		end			
-		endcase	
-		
-		if(out_cmd == 3'b101)
-		begin
-			slave_0_fifo_read = 0;
-			slave_1_fifo_read = 0;
-			slave_2_fifo_read = 0;
-			slave_3_fifo_read = 0;	
-			out_countupto = 0;
-			//arb_lock = 0;
-			
-		end	
-
-		if(out_cmd == 3'b100)
+		if(resety == 1)
 		begin
 			fo.noc_from_dev_ctl = 1;
-			fo.noc_from_dev_data = 0;
-			slave_0_fifo_read = 0;
-			slave_1_fifo_read = 0;
-			slave_2_fifo_read = 0;
-			slave_3_fifo_read = 0;		
 			stm_out = 0;
-			arb_lock = 0;
+			out_cmd = 3'b000;
+			fo.noc_from_dev_data = 0;
 			
 		end
 
-		else
-		begin
-			out_counter = 0;
-			stm_out = 3;
-		end
-	end
-
-	3:
-	begin
-		case(arb_grants)
-		4'b0001:
-		begin
-			fo.noc_from_dev_data = fifo_out_0;	
-		end
-		4'b0010:
-		begin
-			fo.noc_from_dev_data = fifo_out_1;
-		end
-		4'b0100:
-		begin
-			fo.noc_from_dev_data = fifo_out_2;
-		end
-		4'b1000:
-		begin
-			fo.noc_from_dev_data = fifo_out_3;
-		end			
-		endcase	
-
-		if(out_cmd == 3'b011)
-		begin
-			if(out_counter == (out_countupto-1))
+		case(stm_out)
+			0: // deal with response command
 			begin
-				slave_0_fifo_read = 0;
-				slave_1_fifo_read = 0;
-				slave_2_fifo_read = 0;
-				slave_3_fifo_read = 0;			
-
 				fo.noc_from_dev_ctl = 1;
 				fo.noc_from_dev_data = 0;
-				
-				//arb_lock = 0;
+
+				if(arb_grants != 0)
+				begin
+					arb_lock = 1;
+
+					case(arb_grants)
+						4'b0001:
+						begin
+							fo.noc_from_dev_data = #1 fifo_out_0;
+							slave_0_fifo_read = 1;
+							out_cmd = fifo_out_0 [2:0];
+						end
+						
+						4'b0010:
+						begin
+							fo.noc_from_dev_data = #1 fifo_out_1;
+							slave_1_fifo_read = 1;
+							out_cmd = fifo_out_1 [2:0];
+						end
+						
+						4'b0100:
+						begin
+							fo.noc_from_dev_data = #1 fifo_out_2;
+							slave_2_fifo_read = 1;
+							out_cmd = fifo_out_2 [2:0];
+						end
+						
+						4'b1000:
+						begin
+							fo.noc_from_dev_data = #1 fifo_out_3;
+							//fo.noc_from_dev_data = fifo_out_3;
+							slave_3_fifo_read = 1;
+							out_cmd = fifo_out_3 [2:0];
+						end			
+					endcase	
+
+					out_intermittent_counter = 0;
+					
+					stm_out = 1;
+				end
+
+				else
+				begin
+					slave_0_fifo_read = 0;
+					slave_1_fifo_read = 0;
+					slave_2_fifo_read = 0;
+					slave_3_fifo_read = 0;		
+				end
 			end
-		end
 
-		if(out_counter < out_countupto)
-		begin
-			out_counter = out_counter + 1;
-			stm_out = 3;
-		end
-	
-		else
-		begin
+			1: // to deal with setting frm ctl low, and destination id then source id
+			begin
+			
+				if(out_intermittent_counter == 1) fo.noc_from_dev_ctl = 0;
 
-			slave_0_fifo_read = 0;
-			slave_1_fifo_read = 0;
-			slave_2_fifo_read = 0;
-			slave_3_fifo_read = 0;			
+				case(arb_grants)
+					4'b0001:
+					begin
+						if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_0;
+					end
+					
+					4'b0010:
+					begin
+						if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_1;
+					end
+					
+					4'b0100:
+					begin
+						if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_2;
+					end
+					
+					4'b1000:
+					begin
+						if(out_intermittent_counter > 0) fo.noc_from_dev_data = fifo_out_3;
+					end			
+				endcase	
+				
+				if(out_intermittent_counter < 3)
+				begin
+					out_intermittent_counter = out_intermittent_counter + 1;			
+					stm_out = 1;
+				end
 
-			fo.noc_from_dev_ctl = 1;
-			fo.noc_from_dev_data = 0;
-			stm_out = 0;	
+				else 
+				begin
+					if(out_cmd == 3'b011) out_countupto = fo.noc_from_dev_data;
+					stm_out = 2;
+				end
+			end
+			
+			2:
+			begin
+			
+				case(arb_grants)
+				
+					4'b0001:
+					begin
+						fo.noc_from_dev_data = fifo_out_0;
+						
+						if(out_cmd == 3'b100) slave_0_fifo_read = 0;
+					end
+					4'b0010:
+					begin
+						fo.noc_from_dev_data = fifo_out_1;
+						
+						if(out_cmd == 3'b100) slave_1_fifo_read = 0;
+					end
+					4'b0100:
+					begin
+						fo.noc_from_dev_data = fifo_out_2;
+						
+						if(out_cmd == 3'b100) slave_2_fifo_read = 0;
+					end
+					4'b1000:
+					begin
+						fo.noc_from_dev_data = fifo_out_3;
+						
+						if(out_cmd == 3'b100) slave_3_fifo_read = 0;
+					end			
+				endcase	
+				
+				if(out_cmd == 3'b101)
+				begin
+					slave_0_fifo_read = 0;
+					slave_1_fifo_read = 0;
+					slave_2_fifo_read = 0;
+					slave_3_fifo_read = 0;	
+					out_countupto = 0;
+				end	
 
-			arb_lock = 0;		
-		end
-	end
+				if(out_cmd == 3'b100)
+				begin
+					fo.noc_from_dev_ctl = 1;
+					fo.noc_from_dev_data = 0;
+					slave_0_fifo_read = 0;
+					slave_1_fifo_read = 0;
+					slave_2_fifo_read = 0;
+					slave_3_fifo_read = 0;		
+					stm_out = 0;
+					arb_lock = 0;	
+				end
 
-	endcase
+				else
+				begin
+					out_counter = 0;
+					stm_out = 3;
+				end
+			end
 
+			3:
+			begin
+			
+				case(arb_grants)
+					4'b0001:
+					begin
+						fo.noc_from_dev_data = fifo_out_0;	
+					end
+					4'b0010:
+					begin
+						fo.noc_from_dev_data = fifo_out_1;
+					end
+					4'b0100:
+					begin
+						fo.noc_from_dev_data = fifo_out_2;
+					end
+					4'b1000:
+					begin
+						fo.noc_from_dev_data = fifo_out_3;
+					end			
+				endcase	
+
+				if(out_cmd == 3'b011)
+				begin
+				
+					if(out_counter == (out_countupto-1))
+					begin
+						slave_0_fifo_read = 0;
+						slave_1_fifo_read = 0;
+						slave_2_fifo_read = 0;
+						slave_3_fifo_read = 0;			
+
+						fo.noc_from_dev_ctl = 1;
+						fo.noc_from_dev_data = 0;
+					end
+				end
+
+				if(out_counter < out_countupto)
+				begin
+					out_counter = out_counter + 1;
+					stm_out = 3;
+				end
+			
+				else
+				begin
+					slave_0_fifo_read = 0;
+					slave_1_fifo_read = 0;
+					slave_2_fifo_read = 0;
+					slave_3_fifo_read = 0;			
+
+					fo.noc_from_dev_ctl = 1;
+					fo.noc_from_dev_data = 0;
+					stm_out = 0;	
+
+					arb_lock = 0;		
+				end
+			end
+		endcase
     end
 
 endmodule
