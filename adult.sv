@@ -782,7 +782,7 @@ task t10(input reg[7:0] id);
     ix=id[1:0];
     dix=0;
     repeat(5) @(posedge(clk))#1;
-    fi=$fopen("/home/morris/272/f20/sha3_module_tests.txt","r");
+    fi=$fopen("sha3_module_tests.txt","r");
     while(!$feof(fi)) begin
         if(limit>1000) break;
 		junk=$fgets(line,fi);
