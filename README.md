@@ -1,6 +1,6 @@
 # EE272_SYSVERILOG_BUS
 
-___General Readme will be added in future file___
+___Information about inner-workings of the project will be added later.___
 
 *** NOTE: This project was designed based on testbench requirements. It is synthesizeable but it not optimized; it's designed for simulation ***
 
