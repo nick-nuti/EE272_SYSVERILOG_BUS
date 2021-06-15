@@ -1,6 +1,8 @@
 # EE272_SYSVERILOG_BUS
 
-General Readme will be added in future file
+___General Readme will be added in future file___
+
+*** NOTE: This project was designed based on testbench requirements. It is synthesizeable but it not optimized; it's designed for simulation ***
 
 ******NOTE THIS PROJECT WAS IMPLEMENTED + TESTED IN VCS THEN WAS TESTED AGAIN USING VIVADO 2020.2; IF YOU SEE WEIRD RESULTS IT'S DUE TO VERSION DIFFERENCES******
 
