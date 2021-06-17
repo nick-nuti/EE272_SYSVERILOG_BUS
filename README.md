@@ -1,5 +1,15 @@
 # EE272_SYSVERILOG_BUS
 
+Basic flow:
+**PS.V**
+- Datapackets sent from testbench to bus control
+- Bus control state machine places data packets into a fifo
+    - First data packet of a command sequence includes the following info <address length [7:6]> + <data length [5:3]> + <command bits [2:0]>
+    - <command bits [2:0]> specify the following: 000 = idle, 010 = read, 100 = write
+    - <data length [5:3]> 
+- 
+
+
 ___Information about inner-workings of the project will be added later.___
 
 *** NOTE: This project was designed based on testbench requirements. It is synthesizeable but it not optimized; it's designed for simulation ***
